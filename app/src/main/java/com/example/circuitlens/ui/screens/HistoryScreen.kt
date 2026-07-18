@@ -21,7 +21,12 @@ import androidx.compose.ui.unit.sp
 import com.example.circuitlens.ui.components.CircuitHeader
 import com.example.circuitlens.ui.theme.BorderGreen
 import com.example.circuitlens.ui.theme.CardBg
+import com.example.circuitlens.ui.theme.LimePrimary
 import com.example.circuitlens.ui.theme.TextGray
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 
 @Composable
 fun HistoryScreen(onProfileClick: () -> Unit) {
@@ -30,21 +35,45 @@ fun HistoryScreen(onProfileClick: () -> Unit) {
         CircuitHeader(onProfileClick = onProfileClick)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(itemsList) { item ->
-                Row(
+                val interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+
+                val pressedAlpha by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isPressed) 1f else 0f)
+                val contentColor by androidx.compose.animation.animateColorAsState(targetValue = if (isPressed) Color.Black else Color.White)
+                val subtitleColor by androidx.compose.animation.animateColorAsState(targetValue = if (isPressed) Color.DarkGray else TextGray)
+                val iconBgColor by androidx.compose.animation.animateColorAsState(targetValue = if (isPressed) Color.Black.copy(alpha = 0.2f) else BorderGreen.copy(alpha = 0.3f))
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(BorderStroke(1.dp, BorderGreen), RoundedCornerShape(16.dp))
+                        .border(BorderStroke(1.dp, LimePrimary), RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(CardBg)
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) { /* handle click */ }
                 ) {
-                    Box(modifier = Modifier.size(44.dp).background(BorderGreen.copy(alpha = 0.3f), RoundedCornerShape(8.dp)))
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(item, color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("Date", color = TextGray, fontSize = 12.sp)
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(LimePrimary, com.example.circuitlens.ui.theme.LimeGradientEnd)), alpha = pressedAlpha)
+                    )
+                    
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.size(44.dp)) {
+                            Box(modifier = Modifier.fillMaxSize().background(iconBgColor, RoundedCornerShape(8.dp)))
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(item, color = contentColor, fontWeight = FontWeight.Bold)
+                            Text("Date", color = subtitleColor, fontSize = 12.sp)
+                        }
+                        Icon(Icons.Default.ChevronRight, contentDescription = "Open Chat", tint = contentColor)
                     }
-                    Icon(Icons.Default.ChevronRight, contentDescription = "Open Chat", tint = Color.White)
                 }
             }
         }

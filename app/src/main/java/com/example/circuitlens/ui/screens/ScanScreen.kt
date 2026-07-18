@@ -22,6 +22,11 @@ import androidx.compose.ui.unit.sp
 import com.example.circuitlens.ui.components.CircuitHeader
 import com.example.circuitlens.ui.theme.*
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun ScanScreen(onProfileClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
@@ -31,41 +36,66 @@ fun ScanScreen(onProfileClick: () -> Unit) {
         Text("Take a clear photo or upload an image of your circuit board or diagram.", color = TextGray, modifier = Modifier.padding(top = 8.dp, bottom = 24.dp))
 
         // Large Option 1
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.horizontalGradient(listOf(LimePrimary, LimeGradientEnd)), RoundedCornerShape(16.dp))
-                .padding(20.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = "Take Photo", tint = Color.Black, modifier = Modifier.size(32.dp))
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Take a photo", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Use your camera to capture the circuit", color = Color.Black.copy(alpha = 0.7f), fontSize = 12.sp)
-                }
-                Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = Color.Black)
-            }
-        }
+        ScanOptionItem(
+            title = "Take a photo",
+            subtitle = "Use your camera to capture the circuit",
+            icon = Icons.Default.PhotoCamera,
+            onClick = { /* TODO */ }
+        )
 
         // Large Option 2
         Spacer(modifier = Modifier.height(16.dp))
+        ScanOptionItem(
+            title = "Choose from Gallery",
+            subtitle = "Select an existing image",
+            icon = Icons.Default.Image,
+            onClick = { /* TODO */ }
+        )
+    }
+}
+
+@Composable
+fun ScanOptionItem(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    val interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val pressedAlpha by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isPressed) 1f else 0f)
+    val contentColor by androidx.compose.animation.animateColorAsState(targetValue = if (isPressed) Color.Black else Color.White)
+    val subtitleColor by androidx.compose.animation.animateColorAsState(targetValue = if (isPressed) Color.DarkGray else TextGray)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(BorderStroke(1.dp, LimePrimary), RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(CardBg)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .border(BorderStroke(1.dp, BorderGreen), RoundedCornerShape(16.dp))
-                .background(CardBg)
-                .padding(20.dp)
+                .matchParentSize()
+                .background(Brush.horizontalGradient(listOf(LimePrimary, LimeGradientEnd)), alpha = pressedAlpha)
+        )
+        Row(
+            modifier = Modifier.padding(20.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Image, contentDescription = "Gallery", tint = Color.White, modifier = Modifier.size(32.dp))
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Choose from Gallery", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Select an existing image", color = TextGray, fontSize = 12.sp)
-                }
-                Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = Color.White)
+            Icon(icon, contentDescription = title, tint = contentColor, modifier = Modifier.size(32.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, color = contentColor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(subtitle, color = subtitleColor, fontSize = 12.sp)
             }
+            Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = contentColor)
         }
     }
 }

@@ -31,8 +31,8 @@ fun CollapsibleSection(title: String, placeholder: String) {
             .padding(12.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(title, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Expand", tint = Color.Black)
+            Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Expand", tint = Color.White)
         }
         Box(
             modifier = Modifier

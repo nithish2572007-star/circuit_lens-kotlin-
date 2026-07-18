@@ -26,7 +26,8 @@ fun OverviewCard(modifier: Modifier = Modifier, count: String, label: String, ic
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = CardBg),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.example.circuitlens.ui.theme.BorderGreen)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Icon(icon, contentDescription = label, tint = LimePrimary, modifier = Modifier.size(20.dp))

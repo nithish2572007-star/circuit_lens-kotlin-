@@ -32,7 +32,7 @@ fun CircuitButton(text: String, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.horizontalGradient(listOf(LimePrimary, LimeGradientEnd))),
+                .background(Brush.verticalGradient(listOf(LimePrimary, LimeGradientEnd))),
             contentAlignment = Alignment.Center
         ) {
             Text(text, color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)

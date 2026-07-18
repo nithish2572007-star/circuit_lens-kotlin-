@@ -59,14 +59,14 @@ class CurvedBottomNavShape(
             val startCurveX = xOffset - curveWidth / 2
             lineTo(startCurveX, 0f)
 
-            // Smooth curve up (bulge)
+            // Smooth curve down (dip)
             cubicTo(
                 xOffset - bulgeRadius, 0f,
-                xOffset - bulgeRadius, -bulgeRadius * 0.8f,
-                xOffset, -bulgeRadius * 0.8f
+                xOffset - bulgeRadius, bulgeRadius * 0.8f,
+                xOffset, bulgeRadius * 0.8f
             )
             cubicTo(
-                xOffset + bulgeRadius, -bulgeRadius * 0.8f,
+                xOffset + bulgeRadius, bulgeRadius * 0.8f,
                 xOffset + bulgeRadius, 0f,
                 xOffset + curveWidth / 2, 0f
             )
@@ -98,7 +98,7 @@ fun CircuitLensBottomBar(currentScreen: Screen, onTabSelected: (Screen) -> Unit)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(100.dp)
             .background(
                 color = CardBg,
                 shape = CurvedBottomNavShape(animatedX)
@@ -148,6 +148,11 @@ fun BottomNavItem(
         animationSpec = colorAnimationSpec,
         label = "textColor"
     )
+    
+    val iconOffsetY by animateFloatAsState(
+        targetValue = if (isActive) -16f else 0f,
+        label = "iconOffsetY"
+    )
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -159,12 +164,13 @@ fun BottomNavItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) { onClick(screen) }
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .width(72.dp)
+            .padding(vertical = 12.dp)
     ) {
         Box(
             modifier = Modifier
                 .size(52.dp)
-                .offset(y = if (isActive) (-18).dp else 0.dp)
+                .offset(y = iconOffsetY.dp)
                 .clip(CircleShape)
                 .background(if (isActive) LimePrimary else Color.Transparent),
             contentAlignment = Alignment.Center
@@ -183,10 +189,11 @@ fun BottomNavItem(
                 color = textColor,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp).offset(y = (-12).dp)
+                maxLines = 1,
+                modifier = Modifier.padding(top = 4.dp).offset(y = (-4).dp)
             )
         } else {
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(22.dp))
         }
     }
 }

@@ -19,14 +19,25 @@ fun CircuitLensApp() {
         modifier = Modifier.fillMaxSize(),
         color = DarkBg
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.weight(1f)) {
                     AnimatedContent(
                         targetState = currentScreen,
                         transitionSpec = {
-                            fadeIn(animationSpec = tween(300)) togetherWith
-                                    fadeOut(animationSpec = tween(300))
+                            if (initialState == Screen.LOGIN && targetState == Screen.HOME) {
+                                (slideInVertically(animationSpec = tween(500)) { height -> height } + fadeIn(animationSpec = tween(500))).togetherWith(
+                                    fadeOut(animationSpec = tween(500))
+                                )
+                            } else if (initialState == Screen.PROFILE && targetState == Screen.HOME) {
+                                (slideInHorizontally(animationSpec = tween(300)) { width -> -width } + fadeIn(animationSpec = tween(300))).togetherWith(
+                                    slideOutHorizontally(animationSpec = tween(300)) { width -> width } + fadeOut(animationSpec = tween(300))
+                                )
+                            } else {
+                                (slideInHorizontally(animationSpec = tween(300)) { width -> width } + fadeIn(animationSpec = tween(300))).togetherWith(
+                                    slideOutHorizontally(animationSpec = tween(300)) { width -> -width } + fadeOut(animationSpec = tween(300))
+                                )
+                            }
                         },
                         label = "screenTransition"
                     ) { targetScreen ->

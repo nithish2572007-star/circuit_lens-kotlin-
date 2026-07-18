@@ -21,6 +21,11 @@ import com.example.circuitlens.ui.components.CircuitHeader
 import com.example.circuitlens.ui.components.OverviewCard
 import com.example.circuitlens.ui.theme.*
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun HomeScreen(onProfileClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(DarkBg)) {
@@ -35,7 +40,7 @@ fun HomeScreen(onProfileClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(BorderStroke(1.dp, BorderGreen), RoundedCornerShape(16.dp))
+                    .border(BorderStroke(1.dp, LimePrimary), RoundedCornerShape(16.dp))
                     .background(DarkBg)
                     .padding(16.dp)
             ) {
@@ -58,22 +63,43 @@ fun HomeScreen(onProfileClick: () -> Unit) {
 
             // Action Button Card
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
+            val scanInteractionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+            val isScanPressed by scanInteractionSource.collectIsPressedAsState()
+            
+            val scanPressedAlpha by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isScanPressed) 1f else 0f)
+            val scanContentColor by androidx.compose.animation.animateColorAsState(targetValue = if (isScanPressed) Color.Black else Color.White)
+            val scanSubtitleColor by androidx.compose.animation.animateColorAsState(targetValue = if (isScanPressed) Color.DarkGray else TextGray)
+            val scanIconBgColor by androidx.compose.animation.animateColorAsState(targetValue = if (isScanPressed) Color.Black.copy(alpha = 0.2f) else DarkBg)
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(CardBg, RoundedCornerShape(16.dp))
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(CardBg)
+                    .clickable(
+                        interactionSource = scanInteractionSource,
+                        indication = null
+                    ) { /* handle click */ }
             ) {
-                Box(modifier = Modifier.size(48.dp).background(DarkBg, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = "Scan", tint = Color.White)
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(LimePrimary, LimeGradientEnd)), alpha = scanPressedAlpha)
+                )
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.size(48.dp).background(scanIconBgColor, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.PhotoCamera, contentDescription = "Scan", tint = scanContentColor)
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Scan a circuit", color = scanContentColor, fontWeight = FontWeight.Bold)
+                        Text("Capture or upload a photo to analyze", color = scanSubtitleColor, fontSize = 12.sp)
+                    }
+                    Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = scanContentColor)
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Scan a circuit", color = Color.White, fontWeight = FontWeight.Bold)
-                    Text("Capture or upload a photo to analyze", color = TextGray, fontSize = 12.sp)
-                }
-                Icon(Icons.Default.ChevronRight, contentDescription = "Go", tint = Color.White)
             }
 
             // Recent Activity Section

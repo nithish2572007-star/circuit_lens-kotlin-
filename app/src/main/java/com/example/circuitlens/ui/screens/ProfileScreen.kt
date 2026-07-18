@@ -41,7 +41,7 @@ fun ProfileScreen(onBack: () -> Unit) {
         }
 
         Box(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
-            Box(modifier = Modifier.size(120.dp).background(BorderGreen, CircleShape), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(120.dp).background(LimePrimary, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Person, contentDescription = "Profile Picture", tint = Color.White, modifier = Modifier.size(64.dp))
                 Box(
                     modifier = Modifier.size(32.dp).background(Color.Black, CircleShape).align(Alignment.BottomEnd).border(1.dp, Color.White, CircleShape),

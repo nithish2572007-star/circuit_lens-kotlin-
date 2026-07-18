@@ -60,7 +60,7 @@ fun CircuitInputField(
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = LimePrimary,
-                unfocusedBorderColor = BorderGreen,
+                unfocusedBorderColor = LimePrimary,
                 focusedContainerColor = CardBg,
                 unfocusedContainerColor = CardBg,
                 focusedTextColor = Color.White,
