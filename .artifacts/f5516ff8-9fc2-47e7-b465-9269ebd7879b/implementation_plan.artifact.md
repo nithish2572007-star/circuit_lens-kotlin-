@@ -1,59 +1,25 @@
-# Implementation Plan - Refactor CircuitLensApp UI
+# Implementation Plan - Style Profile Button
 
-The goal is to refactor `CircuitLensApp.kt` by splitting it into smaller, manageable files categorized by their role (screens, components, navigation, etc.). This will improve code maintainability and readability.
+The goal is to style the profile button in the `CircuitHeader` to match the visual style provided in the user's attachment.
 
 ## User Review Required
 
-> [!IMPORTANT]
-> This refactor will move many composables to new packages. I will ensure all imports are updated correctly. The main entry point `CircuitLensApp()` will remain in `CircuitLensApp.kt` but will now delegate to the newly created screen files.
+> [!NOTE]
+> I will update the profile button to use an outlined icon and adjust its background and border to match the provided image.
 
 ## Proposed Changes
 
-### Theme
-
-#### [MODIFY] [Color.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/theme/Color.kt)
-- Add colors defined in `CircuitLensApp.kt`: `DarkBg`, `CardBg`, `LimePrimary`, `LimeGradientEnd`, `BorderGreen`, `TextGray`.
-
-### Navigation
-
-#### [NEW] [Screen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/navigation/Screen.kt)
-- Move the `Screen` enum here.
-
 ### Components
 
-Move reusable UI components to `com.example.circuitlens.ui.components`.
-
-#### [NEW] [CircuitHeader.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CircuitHeader.kt)
-#### [NEW] [CircuitInputField.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CircuitInputField.kt)
-#### [NEW] [CircuitButton.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CircuitButton.kt)
-#### [NEW] [AuthToggle.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/AuthToggle.kt)
-#### [NEW] [CircuitLensBottomBar.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CircuitLensBottomBar.kt) (includes `BottomNavItem`)
-#### [NEW] [OverviewCard.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/OverviewCard.kt)
-#### [NEW] [ActivityItem.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/ActivityItem.kt)
-#### [NEW] [CollapsibleSection.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CollapsibleSection.kt)
-
-### Screens
-
-Move individual screens to `com.example.circuitlens.ui.screens`.
-
-#### [NEW] [LoginScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/LoginScreen.kt)
-#### [NEW] [SignUpScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/SignUpScreen.kt)
-#### [NEW] [HomeScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/HomeScreen.kt)
-#### [NEW] [ScanScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/ScanScreen.kt)
-#### [NEW] [ChatScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/ChatScreen.kt)
-#### [NEW] [HistoryScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/HistoryScreen.kt)
-#### [NEW] [ProfileScreen.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/screens/ProfileScreen.kt)
-
-### Main Entry Point
-
-#### [MODIFY] [CircuitLensApp.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/CircuitLensApp.kt)
-- Remove all moved components and screens.
-- Keep only `CircuitLensApp()` composable and necessary imports.
+#### [MODIFY] [CircuitHeader.kt](file:///home/nithish/AndroidStudioProjects/CircuitLens/app/src/main/java/com/example/circuitlens/ui/components/CircuitHeader.kt)
+- Use `Icons.Outlined.Person` instead of `Icons.Default.Person` for a more accurate look.
+- Adjust the `Box` styling:
+    - Background: Use a semi-transparent `BorderGreen` or a darker green.
+    - Border: Add a thin `BorderGreen` border to give it more definition as seen in some designs.
+    - Size: Ensure the size is consistent with the header height (e.g., 40.dp or 44.dp).
 
 ## Verification Plan
 
-### Automated Tests
-- Run `gradle build` to ensure the project compiles with the new structure and updated imports.
-
 ### Manual Verification
-- Deploy the app and navigate through all screens (Login, Sign Up, Home, Scan, Chat, History, Profile) to ensure UI remains functional and looks identical.
+- Deploy the app and compare the profile button with the provided attachment.
+- Ensure it looks clean and matches the "CircuitLens" branding.

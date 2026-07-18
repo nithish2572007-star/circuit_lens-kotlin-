@@ -24,10 +24,10 @@ import com.example.circuitlens.ui.theme.CardBg
 import com.example.circuitlens.ui.theme.TextGray
 
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(onProfileClick: () -> Unit) {
     val itemsList = listOf("CHAT 1", "CHAT 2", "CHAT 3", "CHAT 4", "CHAT 5")
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        CircuitHeader()
+        CircuitHeader(onProfileClick = onProfileClick)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(itemsList) { item ->
                 Row(

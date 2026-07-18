@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,13 +35,18 @@ fun CircuitHeader(titleSuffix: String = "Lens", onProfileClick: (() -> Unit)? = 
         onProfileClick?.let {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
-                    .background(BorderGreen)
+                    .background(Color.White.copy(alpha = 0.1f))
                     .clickable { it() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Person, contentDescription = "Profile", tint = Color.White)
+                Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "Profile",
+                    tint = LimePrimary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }

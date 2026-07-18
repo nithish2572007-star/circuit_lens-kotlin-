@@ -1,21 +1,7 @@
-- [x] Move colors to `ui/theme/Color.kt`
-- [x] Create `ui/navigation/Screen.kt`
-- [x] Create reusable component files in `ui/components/`
-    - [x] `CircuitHeader.kt`
-    - [x] `CircuitInputField.kt`
-    - [x] `CircuitButton.kt`
-    - [x] `AuthToggle.kt`
-    - [x] `CircuitLensBottomBar.kt`
-    - [x] `OverviewCard.kt`
-    - [x] `ActivityItem.kt`
-    - [x] `CollapsibleSection.kt`
-- [x] Create screen files in `ui/screens/`
-    - [x] `LoginScreen.kt`
-    - [x] `SignUpScreen.kt`
-    - [x] `HomeScreen.kt`
-    - [x] `ScanScreen.kt`
-    - [x] `ChatScreen.kt`
-    - [x] `HistoryScreen.kt`
-    - [x] `ProfileScreen.kt`
-- [x] Update `ui/CircuitLensApp.kt` to use the new structure
-- [x] Run build to verify changes
+- [x] Implement `CurvedBottomNavShape` in `CircuitLensBottomBar.kt`
+- [x] Add animated offset for the "bulge" in `CircuitLensBottomBar`
+- [x] Redesign `BottomNavItem` to match the Popping Circular style
+    - [x] Add circular background for active state
+    - [x] Handle label visibility (active only)
+    - [x] Adjust icon/text colors and spacing
+- [x] Verify build and visual animation

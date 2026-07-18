@@ -1,5 +1,7 @@
 package com.example.circuitlens.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,14 +22,23 @@ fun CircuitLensApp() {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Box(modifier = Modifier.weight(1f)) {
-                    when (currentScreen) {
-                        Screen.LOGIN -> LoginScreen(onNavigate = { currentScreen = it })
-                        Screen.SIGNUP -> SignUpScreen(onNavigate = { currentScreen = it })
-                        Screen.HOME -> HomeScreen(onProfileClick = { currentScreen = Screen.PROFILE })
-                        Screen.SCAN -> ScanScreen()
-                        Screen.CHAT -> ChatScreen()
-                        Screen.HISTORY -> HistoryScreen()
-                        Screen.PROFILE -> ProfileScreen(onBack = { currentScreen = Screen.HOME })
+                    AnimatedContent(
+                        targetState = currentScreen,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(300)) togetherWith
+                                    fadeOut(animationSpec = tween(300))
+                        },
+                        label = "screenTransition"
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            Screen.LOGIN -> LoginScreen(onNavigate = { currentScreen = it })
+                            Screen.SIGNUP -> SignUpScreen(onNavigate = { currentScreen = it })
+                            Screen.HOME -> HomeScreen(onProfileClick = { currentScreen = Screen.PROFILE })
+                            Screen.SCAN -> ScanScreen(onProfileClick = { currentScreen = Screen.PROFILE })
+                            Screen.CHAT -> ChatScreen(onProfileClick = { currentScreen = Screen.PROFILE })
+                            Screen.HISTORY -> HistoryScreen(onProfileClick = { currentScreen = Screen.PROFILE })
+                            Screen.PROFILE -> ProfileScreen(onBack = { currentScreen = Screen.HOME })
+                        }
                     }
                 }
 

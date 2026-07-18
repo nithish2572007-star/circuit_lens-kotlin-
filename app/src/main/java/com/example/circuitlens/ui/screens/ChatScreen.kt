@@ -25,9 +25,9 @@ import com.example.circuitlens.ui.theme.LimePrimary
 import com.example.circuitlens.ui.theme.TextGray
 
 @Composable
-fun ChatScreen() {
+fun ChatScreen(onProfileClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        CircuitHeader()
+        CircuitHeader(onProfileClick = onProfileClick)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OverviewCard(modifier = Modifier.weight(1f), count = "2", label = "Components Detected", icon = Icons.Default.Memory)

@@ -23,9 +23,9 @@ import com.example.circuitlens.ui.components.CircuitHeader
 import com.example.circuitlens.ui.theme.*
 
 @Composable
-fun ScanScreen() {
+fun ScanScreen(onProfileClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        CircuitHeader()
+        CircuitHeader(onProfileClick = onProfileClick)
         Text("Capture or Upload", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text("Your Circuits", color = LimePrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text("Take a clear photo or upload an image of your circuit board or diagram.", color = TextGray, modifier = Modifier.padding(top = 8.dp, bottom = 24.dp))
