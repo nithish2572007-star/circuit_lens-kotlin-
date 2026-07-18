@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
 }
+
+
 
 android {
     namespace = "com.example.circuitlens"
@@ -54,4 +57,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
+
+    // Ktor Client dependencies
+    implementation("io.ktor:ktor-client-core:2.3.12")
+    implementation("io.ktor:ktor-client-okhttp:2.3.12")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
+    implementation("io.ktor:ktor-client-websockets:2.3.12")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }

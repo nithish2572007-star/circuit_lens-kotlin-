@@ -44,8 +44,8 @@ fun CircuitLensApp() {
                         when (targetScreen) {
                             Screen.LOGIN -> LoginScreen(onNavigate = { currentScreen = it })
                             Screen.SIGNUP -> SignUpScreen(onNavigate = { currentScreen = it })
-                            Screen.HOME -> HomeScreen(onProfileClick = { currentScreen = Screen.PROFILE })
-                            Screen.SCAN -> ScanScreen(onProfileClick = { currentScreen = Screen.PROFILE })
+                            Screen.HOME -> HomeScreen(onProfileClick = { currentScreen = Screen.PROFILE }, onScanClick = { currentScreen = Screen.SCAN })
+                            Screen.SCAN -> ScanScreen(onProfileClick = { currentScreen = Screen.PROFILE }, onNavigateToChat = { currentScreen = Screen.CHAT })
                             Screen.CHAT -> ChatScreen(onProfileClick = { currentScreen = Screen.PROFILE })
                             Screen.HISTORY -> HistoryScreen(onProfileClick = { currentScreen = Screen.PROFILE })
                             Screen.PROFILE -> ProfileScreen(onBack = { currentScreen = Screen.HOME })

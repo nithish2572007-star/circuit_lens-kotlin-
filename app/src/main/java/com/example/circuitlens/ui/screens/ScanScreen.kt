@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circuitlens.ui.components.CircuitHeader
+import com.example.circuitlens.ui.state.CircuitStateHolder
 import com.example.circuitlens.ui.theme.*
 
 import androidx.compose.foundation.clickable
@@ -28,28 +29,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun ScanScreen(onProfileClick: () -> Unit) {
+fun ScanScreen(onProfileClick: () -> Unit, onNavigateToChat: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         CircuitHeader(onProfileClick = onProfileClick)
         Text("Capture or Upload", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text("Your Circuits", color = LimePrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text("Take a clear photo or upload an image of your circuit board or diagram.", color = TextGray, modifier = Modifier.padding(top = 8.dp, bottom = 24.dp))
 
-        // Large Option 1
+        // Large Option 1: Take a photo -> Loads Voltage Divider
         ScanOptionItem(
-            title = "Take a photo",
-            subtitle = "Use your camera to capture the circuit",
+            title = "Take a photo (Voltage Divider)",
+            subtitle = "Simulate mock live camera analysis",
             icon = Icons.Default.PhotoCamera,
-            onClick = { /* TODO */ }
+            onClick = {
+                CircuitStateHolder.loadCircuit("voltage_divider")
+                onNavigateToChat()
+            }
         )
 
-        // Large Option 2
+        // Large Option 2: Choose from Gallery -> Loads RC Circuit
         Spacer(modifier = Modifier.height(16.dp))
         ScanOptionItem(
-            title = "Choose from Gallery",
-            subtitle = "Select an existing image",
+            title = "Choose from Gallery (RC Circuit)",
+            subtitle = "Select a saved schematic diagram",
             icon = Icons.Default.Image,
-            onClick = { /* TODO */ }
+            onClick = {
+                CircuitStateHolder.loadCircuit("rc_circuit")
+                onNavigateToChat()
+            }
         )
     }
 }

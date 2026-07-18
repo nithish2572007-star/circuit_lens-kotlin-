@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.circuitlens.ui.components.ActivityItem
 import com.example.circuitlens.ui.components.CircuitHeader
 import com.example.circuitlens.ui.components.OverviewCard
+import com.example.circuitlens.ui.state.CircuitStateHolder
 import com.example.circuitlens.ui.theme.*
 
 import androidx.compose.foundation.clickable
@@ -27,14 +28,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun HomeScreen(onProfileClick: () -> Unit) {
+fun HomeScreen(onProfileClick: () -> Unit, onScanClick: () -> Unit) {
+    val activeCircuit = CircuitStateHolder.currentCircuit
+    val simulationResult = CircuitStateHolder.simulationResult
+    
+    val analyzedCount = if (activeCircuit != null) "1" else "0"
+    val errorsCount = if (simulationResult?.status == "error") "1" else "0"
+
     Column(modifier = Modifier.fillMaxSize().background(DarkBg)) {
         CircuitHeader(onProfileClick = onProfileClick)
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text("Welcome back,", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Medium)
             Text("Abc Xyz", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text("Let's analyze and perfect your circuits", color = TextGray, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 20.dp))
+            
+            if (activeCircuit != null) {
+                Text("Active: ${activeCircuit.name}", color = LimePrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
+            } else {
+                Text("Let's analyze and perfect your circuits", color = TextGray, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 20.dp))
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Overview Container
             Box(
@@ -54,9 +68,9 @@ fun HomeScreen(onProfileClick: () -> Unit) {
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OverviewCard(modifier = Modifier.weight(1f), count = "7", label = "Circuits Analyzed", icon = Icons.Default.Settings)
-                        OverviewCard(modifier = Modifier.weight(1f), count = "4", label = "Issues Fixed", icon = Icons.Default.CheckCircle)
-                        OverviewCard(modifier = Modifier.weight(1f), count = "3", label = "Errors Detected", icon = Icons.Default.Warning)
+                        OverviewCard(modifier = Modifier.weight(1f), count = analyzedCount, label = "Circuits Loaded", icon = Icons.Default.Settings)
+                        OverviewCard(modifier = Modifier.weight(1f), count = if (activeCircuit != null && errorsCount == "0") "1" else "0", label = "Healthy Circuits", icon = Icons.Default.CheckCircle)
+                        OverviewCard(modifier = Modifier.weight(1f), count = errorsCount, label = "Errors Detected", icon = Icons.Default.Warning)
                     }
                 }
             }
@@ -78,8 +92,9 @@ fun HomeScreen(onProfileClick: () -> Unit) {
                     .background(CardBg)
                     .clickable(
                         interactionSource = scanInteractionSource,
-                        indication = null
-                    ) { /* handle click */ }
+                        indication = null,
+                        onClick = onScanClick
+                    )
             ) {
                 Box(
                     modifier = Modifier
@@ -109,9 +124,7 @@ fun HomeScreen(onProfileClick: () -> Unit) {
                 Text("View all", color = LimePrimary, fontSize = 14.sp)
             }
             Spacer(modifier = Modifier.height(12.dp))
-            ActivityItem("Circuit #5", "19 June 2026, 21:57 PM")
-            Spacer(modifier = Modifier.height(8.dp))
-            ActivityItem("Circuit #4", "11 June 2026, 07:31 AM")
+            ActivityItem(activeCircuit?.name ?: "No Circuit Loaded", if (activeCircuit != null) "Active session" else "Tap scan below to start")
         }
     }
 }
