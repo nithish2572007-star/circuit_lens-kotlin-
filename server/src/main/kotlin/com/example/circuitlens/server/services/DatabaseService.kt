@@ -1,11 +1,14 @@
 package com.example.circuitlens.server.services
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
 object DatabaseService {
     private val logger = LoggerFactory.getLogger(DatabaseService::class.java)
+    private var dataSource: HikariDataSource? = null
 
     object CircuitsTable : Table("circuits") {
         val id = varchar("id", 100)
@@ -38,20 +41,40 @@ object DatabaseService {
         val dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
 
         try {
-            logger.info("Connecting to PostgreSQL at $dbUrl...")
-            Database.connect(dbUrl, driver = "org.postgresql.Driver", user = dbUser, password = dbPassword)
+            logger.info("Initializing HikariCP connection pool for PostgreSQL at $dbUrl...")
+            val config = HikariConfig().apply {
+                jdbcUrl = dbUrl
+                username = dbUser
+                password = dbPassword
+                driverClassName = "org.postgresql.Driver"
+                maximumPoolSize = 10
+                minimumIdle = 2
+                idleTimeout = 30000
+                connectionTimeout = 5000
+                leakDetectionThreshold = 2000
+            }
+            dataSource = HikariDataSource(config)
+            Database.connect(dataSource!!)
+
             transaction {
                 SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable)
             }
-            logger.info("Successfully initialized PostgreSQL database schema.")
+            logger.info("Successfully initialized PostgreSQL database schema using HikariCP.")
         } catch (e: Exception) {
-            logger.warn("Failed to connect to PostgreSQL ($dbUrl). Falling back to in-memory H2 database. Error: ${e.message}")
+            logger.warn("Failed to connect to PostgreSQL. Falling back to in-memory H2 database. Error: ${e.message}")
             try {
-                Database.connect("jdbc:h2:mem:circuitlens;DB_CLOSE_DELAY=-1;MODE=PostgreSQL", driver = "org.h2.Driver")
+                val config = HikariConfig().apply {
+                    jdbcUrl = "jdbc:h2:mem:circuitlens;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+                    driverClassName = "org.h2.Driver"
+                    maximumPoolSize = 5
+                }
+                dataSource = HikariDataSource(config)
+                Database.connect(dataSource!!)
+
                 transaction {
                     SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable)
                 }
-                logger.info("Successfully initialized in-memory H2 database schema.")
+                logger.info("Successfully initialized in-memory H2 database schema using HikariCP.")
             } catch (h2Ex: Exception) {
                 logger.error("Failed to initialize fallback H2 database!", h2Ex)
             }
