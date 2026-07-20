@@ -14,4 +14,4 @@
 .cxx
 local.properties
 .gradle_home/
-simulation_service/build/
+**/build/
