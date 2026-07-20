@@ -20,14 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circuitlens.ui.components.CircuitButton
 import com.example.circuitlens.ui.components.CircuitInputField
+import com.example.circuitlens.ui.state.CircuitStateHolder
 import com.example.circuitlens.ui.theme.BorderGreen
 import com.example.circuitlens.ui.theme.LimePrimary
 
 @Composable
-fun ProfileScreen(onBack: () -> Unit) {
-    var name by remember { mutableStateOf("A B C") }
-    var email by remember { mutableStateOf("abc@gmail.com") }
-    var username by remember { mutableStateOf("@abc123") }
+fun ProfileScreen(onBack: () -> Unit, onLogout: () -> Unit) {
+    var name by remember { mutableStateOf(CircuitStateHolder.loggedInUserName) }
+    var email by remember { mutableStateOf(CircuitStateHolder.loggedInUserEmail) }
+    var username by remember { mutableStateOf(if (email.contains("@")) "@" + email.substringBefore("@") else "@user") }
     var password by remember { mutableStateOf("********") }
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
@@ -58,6 +59,16 @@ fun ProfileScreen(onBack: () -> Unit) {
         CircuitInputField(value = password, onValueChange = { password = it }, label = "Password", placeholder = "", isPassword = true)
 
         Spacer(modifier = Modifier.height(24.dp))
-        CircuitButton(text = "Save", onClick = onBack)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.weight(1f)) {
+                CircuitButton(text = "Save", onClick = onBack)
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                CircuitButton(
+                    text = "Log Out",
+                    onClick = onLogout
+                )
+            }
+        }
     }
 }

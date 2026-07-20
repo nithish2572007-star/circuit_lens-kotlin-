@@ -21,7 +21,7 @@ private val logger = LoggerFactory.getLogger("ChatRoutes")
 fun Route.chatRoutes() {
     webSocket("/api/v1/chat/ws/{sessionId}") {
         val sessionId = call.parameters["sessionId"] ?: "default_session"
-        val circuitId = call.parameters["circuitId"]
+        val circuitId = call.parameters["circuitId"] ?: call.request.queryParameters["circuitId"]
 
         logger.info("New WebSocket connection. Session ID: $sessionId, Circuit ID: $circuitId")
         send(Frame.Text("Connected to CircuitLens Chatbot Server. Session: $sessionId"))

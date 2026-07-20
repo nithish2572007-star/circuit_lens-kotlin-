@@ -67,11 +67,18 @@ fun CircuitLensApp() {
                             Screen.SCAN -> ScanScreen(onProfileClick = { navigateTo(Screen.PROFILE) }, onNavigateToChat = { navigateTo(Screen.CHAT) })
                             Screen.CHAT -> ChatScreen(onProfileClick = { navigateTo(Screen.PROFILE) })
                             Screen.HISTORY -> HistoryScreen(onProfileClick = { navigateTo(Screen.PROFILE) })
-                            Screen.PROFILE -> ProfileScreen(onBack = {
-                                val previous = backStack.removeLastOrNull()
-                                if (previous != null) currentScreen = previous
-                                else currentScreen = Screen.HOME
-                            })
+                            Screen.PROFILE -> ProfileScreen(
+                                onBack = {
+                                    val previous = backStack.removeLastOrNull()
+                                    if (previous != null) currentScreen = previous
+                                    else currentScreen = Screen.HOME
+                                },
+                                onLogout = {
+                                    CircuitStateHolder.clearState()
+                                    backStack.clear()
+                                    currentScreen = Screen.LOGIN
+                                }
+                            )
                         }
                     }
                 }

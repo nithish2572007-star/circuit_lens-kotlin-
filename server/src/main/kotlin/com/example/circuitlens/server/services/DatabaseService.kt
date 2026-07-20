@@ -89,4 +89,13 @@ object DatabaseService {
             }
         }
     }
+
+    fun close() {
+        try {
+            dataSource?.close()
+            logger.info("Closed database connection pool successfully.")
+        } catch (e: Exception) {
+            logger.error("Failed to close database connection pool: ${e.message}", e)
+        }
+    }
 }

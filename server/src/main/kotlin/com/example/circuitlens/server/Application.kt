@@ -61,9 +61,10 @@ fun Application.module() {
         authRoutes()
     }
 
-    // BUG-08/09 FIX: Close HttpClient singletons when the application shuts down
+    // BUG-08/09 FIX: Close singletons when the application shuts down
     environment.monitor.subscribe(ApplicationStopping) {
         SimulationService.close()
         LLMService.close()
+        DatabaseService.close()
     }
 }

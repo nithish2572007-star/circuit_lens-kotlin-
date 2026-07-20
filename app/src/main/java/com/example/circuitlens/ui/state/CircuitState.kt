@@ -62,6 +62,34 @@ data class ChatMessage(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+@Serializable
+data class LoginRequest(
+    val email: String,
+    val password: String
+)
+
+@Serializable
+data class SignupRequest(
+    val email: String,
+    val password: String,
+    val firstName: String,
+    val lastName: String
+)
+
+@Serializable
+data class UserProfile(
+    val email: String,
+    val firstName: String,
+    val lastName: String
+)
+
+@Serializable
+data class AuthResponse(
+    val status: String,
+    val message: String,
+    val user: UserProfile? = null
+)
+
 object CircuitStateHolder {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var webSocketSession: DefaultClientWebSocketSession? = null
@@ -107,6 +135,70 @@ object CircuitStateHolder {
         errorMessage = null
         loggedInUserName = "User"
         loggedInUserEmail = ""
+    }
+
+    fun login(emailVal: String, passwordVal: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val response: HttpResponse = NetworkClient.client.post("${NetworkClient.BASE_URL}/api/v1/auth/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(LoginRequest(emailVal, passwordVal))
+                }
+                val authRes = response.body<AuthResponse>()
+                if (response.status.isSuccess() && authRes.status == "success" && authRes.user != null) {
+                    withContext(Dispatchers.Main) {
+                        setLoggedInUser(authRes.user.firstName, authRes.user.lastName, authRes.user.email)
+                        onSuccess()
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onError(authRes.message)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError("Network error: ${e.message}")
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    isLoading = false
+                }
+            }
+        }
+    }
+
+    fun signup(firstNameVal: String, lastNameVal: String, emailVal: String, passwordVal: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val response: HttpResponse = NetworkClient.client.post("${NetworkClient.BASE_URL}/api/v1/auth/signup") {
+                    contentType(ContentType.Application.Json)
+                    setBody(SignupRequest(emailVal, passwordVal, firstNameVal, lastNameVal))
+                }
+                val authRes = response.body<AuthResponse>()
+                if (response.status.isSuccess() && authRes.status == "success" && authRes.user != null) {
+                    withContext(Dispatchers.Main) {
+                        setLoggedInUser(authRes.user.firstName, authRes.user.lastName, authRes.user.email)
+                        onSuccess()
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onError(authRes.message)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError("Network error: ${e.message}")
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    isLoading = false
+                }
+            }
+        }
     }
 
     fun loadCircuit(id: String) {

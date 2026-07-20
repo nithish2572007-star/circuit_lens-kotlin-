@@ -19,6 +19,7 @@ import com.example.circuitlens.ui.components.AuthToggle
 import com.example.circuitlens.ui.components.CircuitButton
 import com.example.circuitlens.ui.components.CircuitInputField
 import com.example.circuitlens.ui.navigation.Screen
+import com.example.circuitlens.ui.state.CircuitStateHolder
 import com.example.circuitlens.ui.theme.CardBg
 import com.example.circuitlens.ui.theme.LimePrimary
 import com.example.circuitlens.ui.theme.TextGray
@@ -27,6 +28,8 @@ import com.example.circuitlens.ui.theme.TextGray
 fun LoginScreen(onNavigate: (Screen) -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf<String?>(null) }
+    val isLoading = CircuitStateHolder.isLoading
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -38,8 +41,12 @@ fun LoginScreen(onNavigate: (Screen) -> Unit) {
 
         AuthToggle(isLogin = true, onNavigate = onNavigate)
 
-        CircuitInputField(value = email, onValueChange = { email = it }, label = "Email", placeholder = "Enter email")
-        CircuitInputField(value = password, onValueChange = { password = it }, label = "Password", placeholder = "Enter password", isPassword = true)
+        CircuitInputField(value = email, onValueChange = { email = it; localError = null }, label = "Email", placeholder = "Enter email")
+        CircuitInputField(value = password, onValueChange = { password = it; localError = null }, label = "Password", placeholder = "Enter password", isPassword = true)
+
+        if (localError != null) {
+            Text(localError!!, color = Color(0xFFFF5252), fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -54,7 +61,26 @@ fun LoginScreen(onNavigate: (Screen) -> Unit) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        CircuitButton(text = "Log In", onClick = { onNavigate(Screen.HOME) })
+
+        if (isLoading) {
+            CircularProgressIndicator(color = LimePrimary)
+        } else {
+            CircuitButton(
+                text = "Log In",
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        localError = "Please enter email and password"
+                        return@CircuitButton
+                    }
+                    CircuitStateHolder.login(
+                        emailVal = email,
+                        passwordVal = password,
+                        onSuccess = { onNavigate(Screen.HOME) },
+                        onError = { localError = it }
+                    )
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
         Text("Or login with", color = TextGray, fontSize = 12.sp)
