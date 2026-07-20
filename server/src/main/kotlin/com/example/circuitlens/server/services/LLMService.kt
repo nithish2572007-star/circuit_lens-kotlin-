@@ -101,4 +101,9 @@ object LLMService {
             }
         }
     }
+
+    // BUG-09 FIX: Properly close the HttpClient to release native resources
+    fun close() {
+        client.close()
+    }
 }

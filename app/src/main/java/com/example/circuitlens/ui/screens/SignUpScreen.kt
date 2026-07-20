@@ -18,8 +18,8 @@ import com.example.circuitlens.ui.navigation.Screen
 fun SignUpScreen(onNavigate: (Screen) -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("abc@gmail.com") }
-    var password by remember { mutableStateOf("*********") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),

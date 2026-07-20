@@ -65,6 +65,8 @@ data class ChatMessage(
 object CircuitStateHolder {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var webSocketSession: DefaultClientWebSocketSession? = null
+    // BUG-01 FIX: Track the active WebSocket listener job to cancel it before launching a new one
+    private var chatSessionJob: Job? = null
 
     // Compose observable states
     var currentCircuit by mutableStateOf<Circuit?>(null)
@@ -80,6 +82,32 @@ object CircuitStateHolder {
 
     var errorMessage by mutableStateOf<String?>(null)
         private set
+
+    // BUG-06 & BUG-14 FIX: Track authenticated user info
+    var loggedInUserName by mutableStateOf("User")
+        private set
+
+    var loggedInUserEmail by mutableStateOf("")
+        private set
+
+    fun setLoggedInUser(firstName: String, lastName: String, email: String) {
+        loggedInUserName = if (lastName.isNotBlank()) "$firstName $lastName" else firstName
+        loggedInUserEmail = email
+    }
+
+    // BUG-06 FIX: Clear all state on logout
+    fun clearState() {
+        chatSessionJob?.cancel()
+        chatSessionJob = null
+        webSocketSession = null
+        currentCircuit = null
+        simulationResult = null
+        chatMessages.clear()
+        isLoading = false
+        errorMessage = null
+        loggedInUserName = "User"
+        loggedInUserEmail = ""
+    }
 
     fun loadCircuit(id: String) {
         scope.launch {
@@ -126,10 +154,12 @@ object CircuitStateHolder {
                 }
                 if (response.status.isSuccess()) {
                     val responseBody = response.bodyAsText()
+                    // BUG-07 (null safety): Wrap JSON parsing with lenient decoder
                     val jsonElement = Json.parseToJsonElement(responseBody).jsonObject
                     val simElement = jsonElement["simulation"]
                     if (simElement != null) {
-                        val simResult = Json.decodeFromString<SimulationResult>(simElement.toString())
+                        val lenientJson = Json { ignoreUnknownKeys = true; isLenient = true }
+                        val simResult = lenientJson.decodeFromString<SimulationResult>(simElement.toString())
                         withContext(Dispatchers.Main) {
                             simulationResult = simResult
                             logger.info("Simulation completed. Received voltages: ${simResult.voltages}")
@@ -144,10 +174,17 @@ object CircuitStateHolder {
 
     fun startChatSession() {
         val circuitId = currentCircuit?.id ?: "voltage_divider"
-        scope.launch {
+
+        // BUG-01 FIX: Cancel previous session job before starting a new one
+        chatSessionJob?.cancel()
+
+        chatSessionJob = scope.launch {
             // Close existing session if active
-            webSocketSession?.close()
-            
+            try {
+                webSocketSession?.close()
+            } catch (_: Exception) { /* already closed */ }
+            webSocketSession = null
+
             try {
                 logger.info("Establishing WebSocket chat session for circuit: $circuitId...")
                 NetworkClient.client.webSocket(
@@ -157,7 +194,7 @@ object CircuitStateHolder {
                     path = "/api/v1/chat/ws/session_${System.currentTimeMillis()}?circuitId=$circuitId"
                 ) {
                     webSocketSession = this
-                    
+
                     // Consume incoming frames
                     incoming.consumeAsFlow().collect { frame ->
                         if (frame is Frame.Text) {
@@ -197,6 +234,9 @@ object CircuitStateHolder {
                         }
                     }
                 }
+            } catch (e: CancellationException) {
+                // Normal cancellation — don't treat as error
+                logger.info("WebSocket session cancelled for circuit: $circuitId")
             } catch (e: Exception) {
                 logger.error("WebSocket connection failure: ${e.message}")
                 withContext(Dispatchers.Main) {
@@ -206,10 +246,22 @@ object CircuitStateHolder {
         }
     }
 
+    // BUG-03 FIX: Provide a method to cleanly close the WebSocket session
+    fun closeChatSession() {
+        chatSessionJob?.cancel()
+        chatSessionJob = null
+        scope.launch {
+            try {
+                webSocketSession?.close()
+            } catch (_: Exception) { /* ignore */ }
+            webSocketSession = null
+        }
+    }
+
     fun sendMessage(query: String) {
         if (query.isBlank()) return
         chatMessages.add(ChatMessage("USER", query))
-        
+
         scope.launch {
             val session = webSocketSession
             if (session != null && session.isActive) {

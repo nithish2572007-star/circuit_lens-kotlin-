@@ -25,8 +25,8 @@ import com.example.circuitlens.ui.theme.TextGray
 
 @Composable
 fun LoginScreen(onNavigate: (Screen) -> Unit) {
-    var email by remember { mutableStateOf("abc@gmail.com") }
-    var password by remember { mutableStateOf("*********") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),

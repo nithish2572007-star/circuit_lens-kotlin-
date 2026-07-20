@@ -1,5 +1,6 @@
 package com.example.circuitlens.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
@@ -9,11 +10,29 @@ import androidx.compose.ui.Modifier
 import com.example.circuitlens.ui.components.CircuitLensBottomBar
 import com.example.circuitlens.ui.navigation.Screen
 import com.example.circuitlens.ui.screens.*
+import com.example.circuitlens.ui.state.CircuitStateHolder
 import com.example.circuitlens.ui.theme.DarkBg
 
 @Composable
 fun CircuitLensApp() {
+    // BUG-04 FIX: Implement a navigation backstack
     var currentScreen by remember { mutableStateOf(Screen.LOGIN) }
+    val backStack = remember { mutableStateListOf<Screen>() }
+
+    fun navigateTo(screen: Screen) {
+        if (screen != currentScreen) {
+            backStack.add(currentScreen)
+            currentScreen = screen
+        }
+    }
+
+    // BUG-04 FIX: Handle system back button
+    BackHandler(enabled = backStack.isNotEmpty()) {
+        val previous = backStack.removeLastOrNull()
+        if (previous != null) {
+            currentScreen = previous
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -42,13 +61,17 @@ fun CircuitLensApp() {
                         label = "screenTransition"
                     ) { targetScreen ->
                         when (targetScreen) {
-                            Screen.LOGIN -> LoginScreen(onNavigate = { currentScreen = it })
-                            Screen.SIGNUP -> SignUpScreen(onNavigate = { currentScreen = it })
-                            Screen.HOME -> HomeScreen(onProfileClick = { currentScreen = Screen.PROFILE }, onScanClick = { currentScreen = Screen.SCAN })
-                            Screen.SCAN -> ScanScreen(onProfileClick = { currentScreen = Screen.PROFILE }, onNavigateToChat = { currentScreen = Screen.CHAT })
-                            Screen.CHAT -> ChatScreen(onProfileClick = { currentScreen = Screen.PROFILE })
-                            Screen.HISTORY -> HistoryScreen(onProfileClick = { currentScreen = Screen.PROFILE })
-                            Screen.PROFILE -> ProfileScreen(onBack = { currentScreen = Screen.HOME })
+                            Screen.LOGIN -> LoginScreen(onNavigate = { navigateTo(it) })
+                            Screen.SIGNUP -> SignUpScreen(onNavigate = { navigateTo(it) })
+                            Screen.HOME -> HomeScreen(onProfileClick = { navigateTo(Screen.PROFILE) }, onScanClick = { navigateTo(Screen.SCAN) })
+                            Screen.SCAN -> ScanScreen(onProfileClick = { navigateTo(Screen.PROFILE) }, onNavigateToChat = { navigateTo(Screen.CHAT) })
+                            Screen.CHAT -> ChatScreen(onProfileClick = { navigateTo(Screen.PROFILE) })
+                            Screen.HISTORY -> HistoryScreen(onProfileClick = { navigateTo(Screen.PROFILE) })
+                            Screen.PROFILE -> ProfileScreen(onBack = {
+                                val previous = backStack.removeLastOrNull()
+                                if (previous != null) currentScreen = previous
+                                else currentScreen = Screen.HOME
+                            })
                         }
                     }
                 }
@@ -57,7 +80,7 @@ fun CircuitLensApp() {
                 if (currentScreen in listOf(Screen.HOME, Screen.SCAN, Screen.CHAT, Screen.HISTORY)) {
                     CircuitLensBottomBar(
                         currentScreen = currentScreen,
-                        onTabSelected = { currentScreen = it }
+                        onTabSelected = { navigateTo(it) }
                     )
                 }
             }

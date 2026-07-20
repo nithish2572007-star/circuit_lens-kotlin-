@@ -1,6 +1,5 @@
 package com.example.circuitlens.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +33,7 @@ import com.example.circuitlens.ui.theme.CardBg
 import com.example.circuitlens.ui.theme.LimePrimary
 import com.example.circuitlens.ui.theme.TextGray
 import kotlinx.coroutines.launch
+import androidx.compose.animation.AnimatedVisibility
 
 @Composable
 fun ChatScreen(onProfileClick: () -> Unit) {
@@ -44,9 +44,12 @@ fun ChatScreen(onProfileClick: () -> Unit) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    // 1. Establish real-time WebSocket session when screen mounts
-    LaunchedEffect(Unit) {
+    // BUG-03 FIX: Use DisposableEffect to properly manage WebSocket lifecycle
+    DisposableEffect(Unit) {
         CircuitStateHolder.startChatSession()
+        onDispose {
+            CircuitStateHolder.closeChatSession()
+        }
     }
 
     // Auto-scroll to the bottom when new chat messages arrive
@@ -82,7 +85,7 @@ fun ChatScreen(onProfileClick: () -> Unit) {
                 "${comp.id} $pinsText ${comp.value}"
             }
         } ?: "No active circuit loaded. Use 'Scan' to initialize."
-        
+
         InteractiveCollapsibleSection(
             title = "DETECTED NETLIST",
             content = netlistPlaceholder,

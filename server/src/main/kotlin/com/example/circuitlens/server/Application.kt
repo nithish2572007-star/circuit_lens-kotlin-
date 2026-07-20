@@ -5,11 +5,15 @@ import com.example.circuitlens.server.routes.chatRoutes
 import com.example.circuitlens.server.routes.circuitRoutes
 import com.example.circuitlens.server.services.DatabaseService
 import com.example.circuitlens.server.services.RedisCacheService
+import com.example.circuitlens.server.services.SimulationService
+import com.example.circuitlens.server.services.LLMService
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import java.time.Duration
@@ -38,10 +42,28 @@ fun Application.module() {
         json()
     }
 
+    // BUG-11 FIX: Install CORS plugin for cross-origin requests
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Options)
+    }
+
     // 4. Configure Routing
     routing {
         circuitRoutes()
         chatRoutes()
         authRoutes()
+    }
+
+    // BUG-08/09 FIX: Close HttpClient singletons when the application shuts down
+    environment.monitor.subscribe(ApplicationStopping) {
+        SimulationService.close()
+        LLMService.close()
     }
 }

@@ -83,4 +83,9 @@ object SimulationService {
             }.toString()
         }
     }
+
+    // BUG-08 FIX: Properly close the HttpClient to release native resources
+    fun close() {
+        client.close()
+    }
 }

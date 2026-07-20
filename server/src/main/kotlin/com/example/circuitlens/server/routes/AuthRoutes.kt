@@ -7,10 +7,8 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.security.MessageDigest
 import org.slf4j.LoggerFactory
 
@@ -55,30 +53,32 @@ fun Route.authRoutes() {
                 }
 
                 val emailLower = req.email.lowercase().trim()
-                var userExists = false
-                transaction {
-                    userExists = DatabaseService.UsersTable.selectAll()
-                        .where { DatabaseService.UsersTable.email eq emailLower }
-                        .any()
-                }
-
-                if (userExists) {
-                    call.respond(HttpStatusCode.Conflict, AuthResponse("error", "User with this email already exists"))
-                    return@post
-                }
-
                 val hashedPassword = hashPassword(req.password)
-                transaction {
-                    DatabaseService.UsersTable.insert {
-                        it[email] = emailLower
-                        it[passwordHash] = hashedPassword
-                        it[firstName] = req.firstName
-                        it[lastName] = req.lastName
+
+                // BUG-02 FIX: Single transaction with insertIgnore to avoid TOCTOU race condition
+                var inserted = false
+                try {
+                    transaction {
+                        val result = DatabaseService.UsersTable.insertIgnore {
+                            it[email] = emailLower
+                            it[passwordHash] = hashedPassword
+                            it[firstName] = req.firstName
+                            it[lastName] = req.lastName
+                        }
+                        inserted = result.insertedCount > 0
                     }
+                } catch (e: Exception) {
+                    // Unique constraint violation — user already exists
+                    logger.warn("Signup constraint violation for $emailLower: ${e.message}")
+                    inserted = false
                 }
 
-                logger.info("Successfully registered user: $emailLower")
-                call.respond(HttpStatusCode.Created, AuthResponse("success", "Registration successful", UserProfile(emailLower, req.firstName, req.lastName)))
+                if (inserted) {
+                    logger.info("Successfully registered user: $emailLower")
+                    call.respond(HttpStatusCode.Created, AuthResponse("success", "Registration successful", UserProfile(emailLower, req.firstName, req.lastName)))
+                } else {
+                    call.respond(HttpStatusCode.Conflict, AuthResponse("error", "User with this email already exists"))
+                }
             } catch (e: Exception) {
                 logger.error("Signup error: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, AuthResponse("error", "Internal server error: ${e.message}"))
@@ -88,6 +88,11 @@ fun Route.authRoutes() {
         post("/login") {
             try {
                 val req = call.receive<LoginRequest>()
+                if (req.email.isBlank() || req.password.isBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, AuthResponse("error", "Email and password are required"))
+                    return@post
+                }
+
                 val emailLower = req.email.lowercase().trim()
                 val hashedPassword = hashPassword(req.password)
 

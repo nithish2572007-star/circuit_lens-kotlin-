@@ -40,7 +40,7 @@ fun HomeScreen(onProfileClick: () -> Unit, onScanClick: () -> Unit) {
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             Text("Welcome back,", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Medium)
-            Text("Abc Xyz", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(CircuitStateHolder.loggedInUserName, color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             
             if (activeCircuit != null) {
                 Text("Active: ${activeCircuit.name}", color = LimePrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))

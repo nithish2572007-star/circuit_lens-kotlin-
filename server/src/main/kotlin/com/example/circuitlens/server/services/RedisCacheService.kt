@@ -11,6 +11,9 @@ object RedisCacheService {
     private val inMemoryFallback = ConcurrentHashMap<String, String>()
     private var useFallback = false
 
+    // BUG-13 FIX: Default TTL for cache entries (10 minutes)
+    private const val CACHE_TTL_SECONDS = 600L
+
     fun init() {
         val redisHost = System.getenv("REDIS_HOST") ?: "localhost"
         val redisPort = (System.getenv("REDIS_PORT") ?: "6379").toInt()
@@ -55,7 +58,8 @@ object RedisCacheService {
         }
         try {
             jedisPool?.resource?.use { jedis ->
-                jedis.set("circuit:$id", payload)
+                // BUG-13 FIX: Set with TTL to prevent stale cached data
+                jedis.setex("circuit:$id", CACHE_TTL_SECONDS, payload)
             }
         } catch (e: Exception) {
             logger.warn("Redis write error, using in-memory cache fallback: ${e.message}")

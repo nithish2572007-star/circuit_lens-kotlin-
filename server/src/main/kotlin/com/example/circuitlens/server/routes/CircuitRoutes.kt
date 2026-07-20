@@ -58,7 +58,7 @@ fun Route.circuitRoutes() {
                 transaction {
                     DatabaseService.CircuitsTable.insertIgnore {
                         it[DatabaseService.CircuitsTable.id] = id
-                        it[DatabaseService.CircuitsTable.name] = id.replace("_", " ").capitalize()
+                        it[DatabaseService.CircuitsTable.name] = id.replace("_", " ").replaceFirstChar { c -> c.titlecase() }
                         it[DatabaseService.CircuitsTable.payload] = mockContent
                     }
                 }
