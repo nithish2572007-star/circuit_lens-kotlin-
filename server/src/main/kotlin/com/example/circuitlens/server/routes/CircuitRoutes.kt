@@ -125,7 +125,33 @@ fun Route.circuitRoutes() {
             }.toString()
 
             call.respondText(responseJson, ContentType.Application.Json)
+        }
 
+        get("/history") {
+            val id = call.parameters["id"]
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Missing 'id' parameter")
+                return@get
+            }
+
+            val versions = mutableListOf<kotlinx.serialization.json.JsonObject>()
+            transaction {
+                DatabaseService.CircuitVersionsTable.selectAll()
+                    .where { DatabaseService.CircuitVersionsTable.circuitId eq id }
+                    .orderBy(DatabaseService.CircuitVersionsTable.version, SortOrder.ASC)
+                    .forEach {
+                        versions.add(buildJsonObject {
+                            put("id", it[DatabaseService.CircuitVersionsTable.id])
+                            put("circuitId", it[DatabaseService.CircuitVersionsTable.circuitId])
+                            put("version", it[DatabaseService.CircuitVersionsTable.version])
+                            put("payload", Json.parseToJsonElement(it[DatabaseService.CircuitVersionsTable.payload]))
+                            put("createdAt", it[DatabaseService.CircuitVersionsTable.createdAt])
+                        })
+                    }
+            }
+
+            call.respondText(versions.toString(), ContentType.Application.Json)
         }
     }
 }
+
