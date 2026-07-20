@@ -35,6 +35,15 @@ object DatabaseService {
         override val primaryKey = PrimaryKey(id)
     }
 
+    object UsersTable : Table("users") {
+        val id = integer("id").autoIncrement()
+        val email = varchar("email", 255).uniqueIndex()
+        val passwordHash = varchar("password_hash", 255)
+        val firstName = varchar("first_name", 100)
+        val lastName = varchar("last_name", 100)
+        override val primaryKey = PrimaryKey(id)
+    }
+
     fun init() {
         val dbUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost:5432/circuitlens"
         val dbUser = System.getenv("DB_USER") ?: "postgres"
@@ -57,7 +66,7 @@ object DatabaseService {
             Database.connect(dataSource!!)
 
             transaction {
-                SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable)
+                SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable, UsersTable)
             }
             logger.info("Successfully initialized PostgreSQL database schema using HikariCP.")
         } catch (e: Exception) {
@@ -72,7 +81,7 @@ object DatabaseService {
                 Database.connect(dataSource!!)
 
                 transaction {
-                    SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable)
+                    SchemaUtils.create(CircuitsTable, CircuitVersionsTable, ChatHistoryTable, UsersTable)
                 }
                 logger.info("Successfully initialized in-memory H2 database schema using HikariCP.")
             } catch (h2Ex: Exception) {

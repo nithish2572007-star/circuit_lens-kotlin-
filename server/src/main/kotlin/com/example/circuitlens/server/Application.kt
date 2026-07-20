@@ -1,5 +1,6 @@
 package com.example.circuitlens.server
 
+import com.example.circuitlens.server.routes.authRoutes
 import com.example.circuitlens.server.routes.chatRoutes
 import com.example.circuitlens.server.routes.circuitRoutes
 import com.example.circuitlens.server.services.DatabaseService
@@ -41,5 +42,6 @@ fun Application.module() {
     routing {
         circuitRoutes()
         chatRoutes()
+        authRoutes()
     }
 }

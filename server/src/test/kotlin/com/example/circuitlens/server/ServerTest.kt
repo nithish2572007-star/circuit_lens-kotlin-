@@ -105,5 +105,62 @@ class ServerTest {
         assertTrue(body.contains("Test History"))
         assertTrue(body.contains("Test History Updated"))
     }
+
+    @Test
+    fun testAuthenticationFlow() = testApplication {
+        application {
+            module()
+        }
+        val clientWithJson = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+
+        // 1. Register a new user
+        val signupRequest = com.example.circuitlens.server.routes.SignupRequest(
+            email = "user@test.com",
+            password = "securePassword123",
+            firstName = "John",
+            lastName = "Doe"
+        )
+        val signupRes = clientWithJson.post("/api/v1/auth/signup") {
+            contentType(ContentType.Application.Json)
+            setBody(signupRequest)
+        }
+        assertEquals(HttpStatusCode.Created, signupRes.status)
+        val signupBody = signupRes.bodyAsText()
+        assertTrue(signupBody.contains("success"))
+        assertTrue(signupBody.contains("user@test.com"))
+
+        // 2. Register same user should fail (conflict)
+        val signupDupRes = clientWithJson.post("/api/v1/auth/signup") {
+            contentType(ContentType.Application.Json)
+            setBody(signupRequest)
+        }
+        assertEquals(HttpStatusCode.Conflict, signupDupRes.status)
+
+        // 3. Login successfully
+        val loginRequest = com.example.circuitlens.server.routes.LoginRequest(
+            email = "user@test.com",
+            password = "securePassword123"
+        )
+        val loginRes = clientWithJson.post("/api/v1/auth/login") {
+            contentType(ContentType.Application.Json)
+            setBody(loginRequest)
+        }
+        assertEquals(HttpStatusCode.OK, loginRes.status)
+        val loginBody = loginRes.bodyAsText()
+        assertTrue(loginBody.contains("success"))
+        assertTrue(loginBody.contains("John"))
+
+        // 4. Login failed (incorrect password)
+        val badLoginRequest = loginRequest.copy(password = "wrongPassword")
+        val badLoginRes = clientWithJson.post("/api/v1/auth/login") {
+            contentType(ContentType.Application.Json)
+            setBody(badLoginRequest)
+        }
+        assertEquals(HttpStatusCode.Unauthorized, badLoginRes.status)
+    }
 }
 
